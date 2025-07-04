@@ -67,7 +67,21 @@ require("lazy").setup({
 			require("onedark").load()
 		end,
 	},
-	"lewis6991/gitsigns.nvim",
+	{
+		"lewis6991/gitsigns.nvim",
+		opts = {},
+		config = function()
+			local gs = require("gitsigns")
+
+			local map = function(keys, func, desc)
+				vim.keymap.set("n", keys, func, { desc = "GIT hunk: " .. desc })
+			end
+
+			map("<space><space>r", gs.reset_hunk, "Reset")
+			map("<space><space>s", gs.stage_hunk, "Stage")
+			map("<space><space>p", gs.preview_hunk, "Diff")
+		end,
+	},
 	{
 		"stevearc/oil.nvim",
 		opts = {},
@@ -121,6 +135,10 @@ require("lazy").setup({
 					jumplist = { theme = "ivy" },
 					lsp_document_symbols = { theme = "ivy" },
 					lsp_dynamic_workspace_symbols = { theme = "ivy" },
+					lsp_references = { theme = "ivy" },
+					lsp_implementations = { theme = "ivy" },
+					lsp_definitions = { theme = "ivy" },
+					lsp_type_definitions = { theme = "ivy" },
 				},
 			})
 
@@ -149,26 +167,26 @@ require("lazy").setup({
 			ensure_installed = {
 				"lua",
 				"go",
+				"gotmpl",
 				"rust",
 				"zig",
 				"bash",
 				"c",
 				"cpp",
-				"diff",
 				"html",
-				"markdown",
-				"markdown_inline",
-				"query",
+				"css",
 				"javascript",
 				"typescript",
 				"json",
 				"jsonc",
+				"markdown",
+				"markdown_inline",
+				"query",
 				"toml",
 				"asm",
 				"awk",
-				"css",
-				"gotmpl",
 				"make",
+				"diff",
 			},
 		},
 	},
@@ -185,6 +203,10 @@ require("lazy").setup({
 
 					local client = assert(vim.lsp.get_client_by_id(event.data.client_id))
 					vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
+
+					vim.keymap.set("i", "<c-space>", function()
+						vim.lsp.completion.get()
+					end)
 
 					local map = function(keys, func, desc)
 						vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
@@ -204,23 +226,48 @@ require("lazy").setup({
 			})
 
 			local lspconfig = require("lspconfig")
+
+			lspconfig.lua_ls.setup({
+				settings = {
+					Lua = {
+						completion = {
+							callSnippet = "Replace",
+						},
+						diagnostics = { disable = { "missing-fields" } },
+					},
+				},
+			})
+
 			lspconfig.gopls.setup({})
+
+			lspconfig.ts_ls.setup({})
 		end,
 	},
 	{
 		"stevearc/conform.nvim",
 		opts = {},
 		config = function()
-			require("conform").setup({
+			local conform = require("conform")
+			conform.setup({
 				formatters_by_ft = {
 					lua = { "stylua" },
 					go = { "goimports", "gofumpt" },
-				},
-				format_on_save = {
-					lsp_format = "fallback",
-					timeout_ms = 500,
+					typescript = { "prettierd", "prettier", stop_at_first = true },
 				},
 			})
+
+			vim.keymap.set({ "n", "v" }, "<space>i", function()
+				conform.format({ async = true })
+			end, { desc = "Format code" })
 		end,
+	},
+	{
+		"folke/lazydev.nvim",
+		ft = "lua",
+		opts = {
+			library = {
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		},
 	},
 })
