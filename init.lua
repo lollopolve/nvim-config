@@ -34,6 +34,8 @@ vim.o.cursorline = true
 vim.o.scrolloff = 10
 vim.o.confirm = true
 
+vim.keymap.set("n", "U", "<C-r>", { noremap = true })
+
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
 	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
@@ -54,6 +56,9 @@ require("lazy").setup({
 				end,
 				desc = "Buffer Local Keymaps (which-key)",
 			},
+		},
+		opts = {
+			delay = 500,
 		},
 	},
 	{
@@ -79,12 +84,16 @@ require("lazy").setup({
 
 			map("<space><space>r", gs.reset_hunk, "Reset")
 			map("<space><space>s", gs.stage_hunk, "Stage")
-			map("<space><space>p", gs.preview_hunk, "Diff")
+			map("<space><space>d", gs.preview_hunk, "Diff")
 		end,
 	},
 	{
 		"stevearc/oil.nvim",
-		opts = {},
+		opts = {
+			view_options = {
+				show_hidden = true,
+			},
+		},
 		dependencies = {
 			{ "echasnovski/mini.icons", opts = {} },
 		},
@@ -146,17 +155,16 @@ require("lazy").setup({
 			ts.load_extension("ui-select")
 
 			local b = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>h", b.help_tags, { desc = "Find help" })
-			vim.keymap.set("n", "<leader>k", b.keymaps, { desc = "Find keymap" })
+			vim.keymap.set("n", "<leader>h", b.help_tags, { desc = "Find help tags" })
+			vim.keymap.set("n", "<leader>k", b.keymaps, { desc = "Find keymaps" })
 			vim.keymap.set("n", "<leader>/", b.current_buffer_fuzzy_find, { desc = "Find in current buffer" })
 			vim.keymap.set("n", "<leader>f", b.find_files, { desc = "Find files" })
-			-- vim.keymap.set("n", "<leader>s", builtin.builtin, { desc = "Find builtin" })
+			vim.keymap.set("n", "<leader>c", b.commands, { desc = "Find commands" })
 			vim.keymap.set("n", "<leader>w", b.live_grep, { desc = "Find word" })
-			vim.keymap.set("n", "<leader>d", b.diagnostics, { desc = "Find diagnostic" })
-			vim.keymap.set("n", "<leader>b", b.buffers, { desc = "Find open buffer" })
+			vim.keymap.set("n", "<leader>d", b.diagnostics, { desc = "Find diagnostics" })
+			vim.keymap.set("n", "<leader>b", b.buffers, { desc = "Find open buffers" })
 			vim.keymap.set("n", "<leader>g", b.git_files, { desc = "Find Git files" })
 			vim.keymap.set("n", "<leader>j", b.jumplist, { desc = "Find in jump list" })
-			-- vim.keymap.set("n", "<leader>r", builtin.resume, { desc = "Resume last find" })
 		end,
 	},
 	{
@@ -262,6 +270,26 @@ require("lazy").setup({
 		end,
 	},
 	{
+		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
+		opts = {},
+	},
+	{
+		"folke/flash.nvim",
+		event = "VeryLazy",
+		opts = {},
+		keys = {
+			{
+				"s",
+				mode = { "n", "x", "o" },
+				function()
+					require("flash").jump()
+				end,
+				desc = "Flash",
+			},
+		},
+	},
+	{
 		"folke/lazydev.nvim",
 		ft = "lua",
 		opts = {
@@ -270,4 +298,7 @@ require("lazy").setup({
 			},
 		},
 	},
+	"mfussenegger/nvim-dap",
 })
+
+require("dapconfig")
