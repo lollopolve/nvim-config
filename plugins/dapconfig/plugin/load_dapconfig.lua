@@ -19,3 +19,5 @@ dap.adapters.delve = function(callback, config)
 		})
 	end
 end
+
+vim.print("hello")
