@@ -299,5 +299,5 @@ require("lazy").setup({
 		},
 	},
 	"mfussenegger/nvim-dap",
-	{ dir = "./plugins/dapconfig" },
+	{ dir = "~/.config/nvim/plugins/dapconfig" },
 })
