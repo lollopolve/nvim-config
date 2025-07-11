@@ -34,16 +34,6 @@ vim.o.cursorline = true
 vim.o.scrolloff = 10
 vim.o.confirm = true
 
-vim.keymap.set("n", "U", "<C-r>", { noremap = true })
-
-vim.api.nvim_create_autocmd("TextYankPost", {
-	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-	callback = function()
-		vim.hl.on_yank()
-	end,
-})
-
 require("lazy").setup({
 	{
 		"folke/which-key.nvim",
@@ -82,9 +72,9 @@ require("lazy").setup({
 				vim.keymap.set("n", keys, func, { desc = "GIT hunk: " .. desc })
 			end
 
-			map("<space><space>r", gs.reset_hunk, "Reset")
-			map("<space><space>s", gs.stage_hunk, "Stage")
-			map("<space><space>d", gs.preview_hunk, "Diff")
+			map("<leader>gr", gs.reset_hunk, "Reset")
+			map("<leader>gs", gs.stage_hunk, "Stage")
+			map("<leader>gd", gs.preview_hunk, "Diff")
 		end,
 	},
 	{
@@ -98,6 +88,14 @@ require("lazy").setup({
 			{ "echasnovski/mini.icons", opts = {} },
 		},
 		lazy = false,
+	},
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		config = true,
+		opts = {
+			disable_filetype = {},
+		},
 	},
 	{
 		"nvim-telescope/telescope.nvim",
@@ -163,7 +161,7 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>w", b.live_grep, { desc = "Find word" })
 			vim.keymap.set("n", "<leader>d", b.diagnostics, { desc = "Find diagnostics" })
 			vim.keymap.set("n", "<leader>b", b.buffers, { desc = "Find open buffers" })
-			vim.keymap.set("n", "<leader>g", b.git_files, { desc = "Find Git files" })
+			vim.keymap.set("n", "<leader>m", b.marks, { desc = "Find marks" })
 			vim.keymap.set("n", "<leader>j", b.jumplist, { desc = "Find in jump list" })
 		end,
 	},
@@ -185,6 +183,7 @@ require("lazy").setup({
 				"css",
 				"javascript",
 				"typescript",
+				"vue",
 				"json",
 				"jsonc",
 				"markdown",
@@ -207,7 +206,7 @@ require("lazy").setup({
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("OnLspAttach", { clear = true }),
 				callback = function(event)
-					vim.o.completeopt = "menu,menuone,noinsert,preview"
+					vim.o.completeopt = "menu,menuone,noinsert"
 
 					local client = assert(vim.lsp.get_client_by_id(event.data.client_id))
 					vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
@@ -248,7 +247,33 @@ require("lazy").setup({
 
 			lspconfig.gopls.setup({})
 
-			lspconfig.ts_ls.setup({})
+			local node_modules_global = "/usr/local/bin/node_modules"
+
+			local nvm_bin = os.getenv("NVM_BIN")
+			if nvm_bin ~= "" then
+				node_modules_global = nvm_bin .. "/../lib/node_modules"
+			end
+
+			lspconfig.ts_ls.setup({
+				init_options = {
+					plugins = {
+						{
+							name = "@vue/typescript-plugin",
+							location = node_modules_global .. "/@vue/language-server",
+							languages = { "vue" },
+						},
+					},
+				},
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"javascript.jsx",
+					"typescript",
+					"typescriptreact",
+					"typescript.tsx",
+					"vue",
+				},
+			})
 		end,
 	},
 	{
@@ -264,7 +289,7 @@ require("lazy").setup({
 				},
 			})
 
-			vim.keymap.set({ "n", "v" }, "<space>i", function()
+			vim.keymap.set({ "n", "v" }, "<leader>i", function()
 				conform.format({ async = true })
 			end, { desc = "Format code" })
 		end,
@@ -301,3 +326,15 @@ require("lazy").setup({
 	"mfussenegger/nvim-dap",
 	{ dir = "~/.config/nvim/plugins/dapconfig" },
 })
+
+vim.api.nvim_create_autocmd("TextYankPost", {
+	desc = "Highlight when yanking (copying) text",
+	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+	callback = function()
+		vim.hl.on_yank()
+	end,
+})
+
+vim.keymap.set("n", "U", "<C-r>", { noremap = true })
+-- not working for some reason
+-- vim.keymap.set("n", "<leader>d", "<C-W>d", { desc = "Show diagnostics under the cursor", noremap = true })
