@@ -234,6 +234,8 @@ require("lazy").setup({
 
 			local lspconfig = require("lspconfig")
 
+			lspconfig.clangd.setup({})
+
 			lspconfig.lua_ls.setup({
 				settings = {
 					Lua = {
@@ -250,7 +252,7 @@ require("lazy").setup({
 			local node_modules_global = "/usr/local/bin/node_modules"
 
 			local nvm_bin = os.getenv("NVM_BIN")
-			if nvm_bin ~= "" then
+			if nvm_bin ~= nil then
 				node_modules_global = nvm_bin .. "/../lib/node_modules"
 			end
 
@@ -274,6 +276,10 @@ require("lazy").setup({
 					"vue",
 				},
 			})
+
+			lspconfig.zls.setup({})
+
+			lspconfig.ts_ls.setup({})
 		end,
 	},
 	{
