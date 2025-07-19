@@ -292,6 +292,7 @@ require("lazy").setup({
 					lua = { "stylua" },
 					go = { "goimports", "gofumpt" },
 					typescript = { "prettierd", "prettier", stop_at_first = true },
+					zig = { "zigfmt" },
 				},
 			})
 
